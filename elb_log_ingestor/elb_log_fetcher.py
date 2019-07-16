@@ -1,7 +1,7 @@
 """
 Retrieves ELB log files
 """
-
+import io
 import logging
 import pathlib
 import queue
@@ -21,7 +21,6 @@ class S3LogFetcher:
         unprocessed_prefix: str,
         processing_prefix: str,
         processed_prefix: str,
-        workdir: pathlib.Path,
         to_do: queue.Queue,
         done: queue.Queue,
         start_queue_size: int = 5,
@@ -32,7 +31,6 @@ class S3LogFetcher:
         unprocessed_prefix: the prefix in the bucket to look for new logs
         processing_prefix: the prefix in the bucket to put/find processing logs
         processed_prefix: the prefix in the bucket to put processed logs
-        workdir: the directory to put logs into for processing
         to_do: the queue to send work to the log parser
         done: the queue to listen on for finished work
         start_queue_size: how many logs to pull down on startup
@@ -42,7 +40,6 @@ class S3LogFetcher:
         self.unprocessed_prefix = unprocessed_prefix
         self.processing_prefix = processing_prefix
         self.processed_prefix = processed_prefix
-        self.workdir = workdir
         self.to_do = to_do
         self.done = done
         self.start_queue_size = start_queue_size
@@ -98,9 +95,11 @@ class S3LogFetcher:
             return None
         next_object = boto_reponse["Contents"][0]["Key"]
         processing_name = self.mark_log_processing(next_object)
-        local_file = workdir / processing_name
-        self.botoclient.Bucket(self.bucket).download_file(processing_name, local_file)
-        return processing_name
+        contents = io.BytesIO()
+        self.botoclient.Bucket(self.bucket).download_fileobj(processing_name, contents)
+        contents.seek(0)
+        strings = [line.decode('utf-8') for line in contents.readlines()]
+        return processing_name, strings
 
     def mark_log_processed(self, logname: str) -> None:
         """

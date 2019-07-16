@@ -44,8 +44,10 @@ def test_parse_logs(log_file):
     file_out_queue = ListQueue
     record_out_queue = ListQueue()
     stats_parser = elb_log_ingestor.stats.ParserStats()
-    parser = elb_log_ingestor.elb_log_parse.LogParser(file_in_queue, file_out_queue, record_out_queue, stats_parser, pathlib.Path())
-    parser.parse_alb_logs(logfile)
+    parser = elb_log_ingestor.elb_log_parse.LogParser(file_in_queue, file_out_queue, record_out_queue, stats_parser)
+    with open(logfile) as f:
+        strings = f.readlines()
+    parser.parse_alb_logs(logfile.name, strings)
     contents = [x[1] for x in record_out_queue.list_]
     assert sorted(contents, key=lambda x: x['@raw']) == sorted(expected_contents, key=lambda x: x['@raw'])
 

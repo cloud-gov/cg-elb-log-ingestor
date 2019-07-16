@@ -126,8 +126,7 @@ class LogParser:
         file_in_queue: queue.Queue,
         file_out_queue: queue.Queue,
         record_out_queue: queue.Queue,
-        stats: ParserStats,
-        workdir: Path,
+        stats: ParserStats
     ) -> None:
         # where we get files to process
         self.file_in_queue = file_in_queue
@@ -140,49 +139,50 @@ class LogParser:
 
     def run(self) -> None:
         while True:
-            logfile = None
+            lines = None
+            name = None
             try:
-                logfile = self.file_in_queue.get()
+                name, lines = self.file_in_queue.get()
             except queue.Empty:
                 pass
-            if logfile is not None:
-                self.parse_alb_logs(logfile)
+            if name is not None:
+                self.parse_alb_logs(name, lines)
+                self.file_out_queue.put(name)
             else:
                 threading.sleep(30)
 
-    def parse_alb_logs(self, logfile: Path) -> None:
+    def parse_alb_logs(self, name, lines: typing.List[str]) -> None:
         """
         Parse log lines and push their messages to the queue
         """
-        with open(logfile) as log_lines:
-            for line in log_lines:
-                line = line.strip()
-                log_type = ALB
-                match = ALB_LOG_LINE_REGEX.match(line)
-                if match is None:
-                    log_type = ELB
-                    match = ELB_LOG_LINE_REGEX.match(line)
-                if match is None:
-                    self.stats.increment_lines_errored()
-                    logger.error("failed to match: '%s'", line)
-                    return
-                try:
-                    match = coerce_match_types(match)
-                except ValueError as e:
-                    logger.error("failed to coerce match: %s with %s", match, e)
-                if log_type is ALB:
-                    match = format_alb_match(match)
-                else:
-                    match = format_elb_match(match)
-                match = remove_empty_fields(match)
-                match = add_metadata(match, line, logfile.name)
-                if match is not None:
-                    id = generate_id(match)
-                    self.outbox.put((id, match))
-                    self.stats.increment_lines_processed()
-                else:
-                    self.stats.increment_lines_errored()
-                    logger.error("match None after processing: '%s'", line)
+        for line in lines:
+            line = line.strip()
+            log_type = ALB
+            match = ALB_LOG_LINE_REGEX.match(line)
+            if match is None:
+                log_type = ELB
+                match = ELB_LOG_LINE_REGEX.match(line)
+            if match is None:
+                self.stats.increment_lines_errored()
+                logger.error("failed to match: '%s'", line)
+                return
+            try:
+                match = coerce_match_types(match)
+            except ValueError as e:
+                logger.error("failed to coerce match: %s with %s", match, e)
+            if log_type is ALB:
+                match = format_alb_match(match)
+            else:
+                match = format_elb_match(match)
+            match = remove_empty_fields(match)
+            match = add_metadata(match, line, name)
+            if match is not None:
+                id = generate_id(match)
+                self.outbox.put((id, match))
+                self.stats.increment_lines_processed()
+            else:
+                self.stats.increment_lines_errored()
+                logger.error("match None after processing: '%s'", line)
 
 
 def format_alb_match(match: typing.Dict) -> typing.Dict:
