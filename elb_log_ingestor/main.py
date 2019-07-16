@@ -3,7 +3,6 @@ import os
 import pathlib
 import queue
 import sys
-import tempdir
 import threading
 
 import boto
@@ -22,7 +21,6 @@ def start_server():
 
     es_client = elasticsearch.Elasticsearch()
     s3_client = boto.client("s3")
-    workdir = get_workdir()
     server_address = get_server_address()
 
     logs_to_be_processed = queue.Queue()
@@ -38,14 +36,13 @@ def start_server():
         unprocessed_prefix=unprocessed_prefix,
         processing_prefix=processing_prefix,
         processed_prefix=processed_prefix,
-        workdir=workdir,
         to_do=logs_to_be_processed,
         done=logs_processed,
         start_queue_size=start_queue_size,
     )
 
     parser = elb_log_parse.LogParser(
-        logs_to_be_processed, logs_processed, parser_stats, workdir
+        logs_to_be_processed, logs_processed, parser_stats
     )
     shipper = elasticsearch_shipper.ElasticsearchShipper(
         es_client, records, index_pattern, shipper_stats
@@ -62,13 +59,6 @@ def start_server():
     parser_thread.start()
     shipper_thread.start()
     server_thread.start()
-
-
-def get_workdir() -> pathlib.Path:
-    workdir = os.environ.get("ELB_INGESTOR_WORKDIR")
-    if workdir is None:
-        workdir = tempfile.mkdtemp()
-    return pathlib.Path(workdir)
 
 
 def get_server_address() -> (str, int):
