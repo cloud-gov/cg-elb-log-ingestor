@@ -3,4 +3,10 @@ tmp
 credentials.yml
 .vscode
 *.swp
-
+.eggs
+*.egg-info
+dist/
+**/__pycache__
+.pytest_cache
+build
+venv
