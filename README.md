@@ -11,13 +11,15 @@ opinions took more work than writing our own single-purpose app
 Coming soon
 
 ### reprocessing logs
+If you need to reprocess logs (for instance, an instance failed or records were lost from elasticsearch), 
+copy the files containing the logs back into the bucket/prefix that the parser reads from. The parser
+will re-parse the document, and any duplicate records will be ignored on insert.
 
 
 ## How does it work?
 
 ### Delivery model
-We use an at-least-once model, then rely on using predictable ids in Elasticsearch to
-deduplicate logs
+We use an at-least-once model, then rely on using predictable ids in Elasticsearch to deduplicate logs
 
 ### log fetcher
 The log fetcher pulls logs from S3. When a log is downloaded, it moves it into a processing directory in the bucket.
