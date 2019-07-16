@@ -77,3 +77,6 @@ def get_server_address() -> (str, int):
         listen_host = ""
     listen_port = os.environ.get("ELB_INGESTOR_LISTEN_PORT", 13131)
     return listen_host, listen_port
+
+if __name__ == '__main__':
+    start_server()
