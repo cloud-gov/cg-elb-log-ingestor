@@ -19,17 +19,20 @@ def start_server():
     parser_stats = stats.ParserStats()
     shipper_stats = stats.ShipperStats()
 
-    es_client = elasticsearch.Elasticsearch()
+    elasticsearch_hosts = os.environ['ELB_INGESTOR_ELASTICSEARCH_HOSTS']
+    elasticsearch_hosts = elasticsearch_hosts.split(',')
+    es_client = elasticsearch.Elasticsearch(elasticsearch_hosts, sniff_on_start=True, sniffer_timeout=60)
     s3_client = boto.client("s3")
     server_address = get_server_address()
 
     logs_to_be_processed = queue.Queue()
     logs_processed = queue.Queue()
     records = queue.Queue()
+    bucket = os.environ['ELB_INGESTOR_BUCKET']
     unprocessed_prefix = os.environ.get("ELB_INGESTOR_SEARCH_PREFIX", "logs/")
     processing_prefix = os.environ.get("ELB_INGESTOR_WORKING_PREFIX", "logs-working/")
     processed_prefix = os.environ.get("ELB_INGESTOR_DONE_PREFIX", "logs-done/")
-    start_queue_size = int(os.environ.get("ELB_START_QUEUE_SIZE", 5))
+    start_queue_size = int(os.environ.get("ELB_INGESTOR_START_QUEUE_SIZE", 5))
     fetcher = elb_log_fetcher.S3LogFetcher(
         bucket,
         s3_client,
