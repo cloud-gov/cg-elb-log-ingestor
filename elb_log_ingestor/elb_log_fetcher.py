@@ -33,7 +33,7 @@ class S3LogFetcher:
         processed_prefix: the prefix in the bucket to put processed logs
         to_do: the queue to send work to the log parser
         done: the queue to listen on for finished work
-        start_queue_size: how many logs to pull down on startup
+        start_queue_size: how many log files to pull down on startup
         """
         self.bucket = bucket
         self.botoclient = s3_client
