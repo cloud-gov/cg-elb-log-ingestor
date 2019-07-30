@@ -51,10 +51,10 @@ class ElasticsearchShipper:
         except elasticsearch.ConflictError:
             self.stats.increment_duplicates_skipped()
             logger.info("Skipping duplicate document with id %s", id_)
-        except e:
+        except Exception:
             # if it failed for an unknown reason, log it and put it back on the queue so we can try again
             self.stats.increment_documents_errored()
-            logger.error(e)
+            logger.exception("Failed to index document")
             self.record_queue.put((id_, record))
         else:
             self.stats.increment_documents_indexed()

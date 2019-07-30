@@ -84,9 +84,9 @@ class S3LogFetcher:
             boto_reponse = self.botoclient.list_objects_v2(
                 Bucket=self.bucket, MaxKeys=1, Prefix=self.unprocessed_prefix
             )
-        except Exception as e:
+        except Exception:
             # ignore it and try again later - hopefully someone's checking health
-            logger.error(e)
+            logger.exception('Failed listing logs in S3')
             self.healthy = False
             return None
         else:
