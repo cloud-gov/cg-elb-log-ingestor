@@ -17,6 +17,9 @@ class ParserStats:
 
     @property
     def lines_processed(self) -> int:
+        """
+        The number of log lines the parser has successfully parsed
+        """
         with self.lock:
             return self._lines_processed
 
@@ -26,6 +29,9 @@ class ParserStats:
 
     @property
     def lines_errored(self) -> int:
+        """
+        The number of log lines the parser has encountered errors on
+        """
         with self.lock:
             return self._lines_errored
 
@@ -35,6 +41,9 @@ class ParserStats:
 
     @property
     def files_processed(self) -> int:
+        """
+        The number of files the parser has completed processing
+        """
         with self.lock:
             return self._files_processed
 
@@ -44,6 +53,9 @@ class ParserStats:
 
     @property
     def last_new_file_time(self) -> datetime.datetime:
+        """
+        The last time a new file was downloaded
+        """
         with self.lock:
             return self._last_new_file_time
 
@@ -73,6 +85,9 @@ class ShipperStats:
 
     @property
     def documents_indexed(self) -> int:
+        """
+        The number of documents the ElasticsearchShipper has successfully sent to elasticsearch
+        """
         with self.lock():
             return self._documents_indexed
 
@@ -82,6 +97,10 @@ class ShipperStats:
 
     @property
     def documents_errored(self) -> int:
+        """
+        The number of times the ElasticsearchShipper has attempted to index a document and failed,
+        not including failures due to duplicate documents
+        """
         with self.lock():
             return self._documents_errored
 
@@ -91,6 +110,9 @@ class ShipperStats:
 
     @property
     def duplicates_skipped(self) -> int:
+        """
+        The number of times the ElasticsearchShipper has tried to index a document that already exists
+        """
         with self.lock():
             return self._duplicates_skipped
 
@@ -100,6 +122,9 @@ class ShipperStats:
 
     @property
     def last_document_time(self) -> datetime.datetime:
+        """
+        The last time the ElasticsearchShipper indexed a document
+        """
         with self.lock:
             return self._last_document_time
 
