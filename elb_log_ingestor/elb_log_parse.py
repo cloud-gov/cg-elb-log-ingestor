@@ -200,6 +200,7 @@ def format_alb_match(match: typing.Dict) -> typing.Dict:
     Turn a match dict from an ELB log into a record appropriate for Elasticsearch
     """
     new_match = {
+        # request_verb, _url, and _proto will be empty strings in some cases. Replace the empty strings with -
         "@message": f"{match['request_verb'] or '-'} {match['request_url'] or '-'} {match['request_proto'] or '-'}",
         "@timestamp": match["time"],
         "@alb": {
