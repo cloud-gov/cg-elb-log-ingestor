@@ -54,7 +54,7 @@ class ParserStats:
     @property
     def last_new_file_time(self) -> datetime.datetime:
         """
-        The last time a new file was downloaded
+        The last time the parser started parsing a new file
         """
         with self.lock:
             return self._last_new_file_time
