@@ -10,7 +10,7 @@ opinions took more work than writing our own single-purpose app
 ## How do I run it?
 
 ### configuration
-AWS authentication is via [boto3](), so use any auth method supported there.
+AWS authentication is via [boto3][boto3], so use any auth method supported there.
 All other configuration is done via environment variables:
 
 | env variable                       | description                                            | default         |
@@ -65,3 +65,5 @@ $ python -m venv venv
 $ . venv/bin/activate
 $ python setup.py test
 ```
+
+[boto3]: https://boto3.amazonaws.com/v1/documentation/api/latest/index.html
