@@ -129,7 +129,7 @@ class S3LogFetcher:
         delete_request = {"Objects": [{"Key": from_}], "Quiet": True}
         bucket.delete_objects(Delete=delete_request)
 
-    def processing_name_from_unprocessed_name(unprocessed_name: str) -> str:
+    def processing_name_from_unprocessed_name(self, unprocessed_name: str) -> str:
         """
         Determine the processing name from an unprocessed name
         """
@@ -137,7 +137,7 @@ class S3LogFetcher:
             unprocessed_name, self.unprocessed_prefix, self.processed_prefix
         )
 
-    def processed_name_from_processing_name(processing_name: str) -> str:
+    def processed_name_from_processing_name(self, processing_name: str) -> str:
         """
         Determine the processed name from an unprocessed name
         """
