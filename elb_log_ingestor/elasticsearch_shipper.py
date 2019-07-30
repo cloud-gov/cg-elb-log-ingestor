@@ -16,6 +16,9 @@ HTTP_CONFLICT = 409
 
 
 class ElasticsearchShipper:
+    """
+    Send messages to elasticsearch
+    """
     def __init__(
         self,
         elasticsearch_client: elasticsearch.client,
@@ -29,11 +32,19 @@ class ElasticsearchShipper:
         self.stats = stats
 
     def run(self) -> None:
+        """
+        Actually do the work:
+        - pull a message off the queue
+        - send the message to elasticsearch
+        """
         while True:
             record = self.record_queue.get()
             self.index_record(*record)
 
     def index_record(self, id_: str, record: typing.Dict) -> None:
+        """
+        Index a document into elasticsearch
+        """
         index = self.figure_index(record)
         try:
             self.es.create(index=index, id=id_, body=record)
@@ -55,6 +66,9 @@ class ElasticsearchShipper:
 
     @property
     def healthy(self) -> bool:
+        """
+        Check if we can reach elasticsearch
+        """
         healthy = False
         try:
             healthy = self.es.ping()
