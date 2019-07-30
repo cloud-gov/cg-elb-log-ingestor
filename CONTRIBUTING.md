@@ -20,8 +20,10 @@ If you have any questions or want to read more, check out the
 
 ## Coding Standards
 
-We adhere to [PEP8][] for Python code formatting, and use black to autoformat.
-Before committing, please run black to ensure that your changes conform.
+We adhere to [PEP8][pep8] for Python code formatting, and use black to autoformat.
+Before committing, please run black to ensure that your changes conform.o
+
+[pep8]: https://www.python.org/dev/peps/pep-0008/
 
 ## Pull request guidelines
 
