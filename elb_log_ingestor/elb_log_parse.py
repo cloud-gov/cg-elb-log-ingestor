@@ -156,8 +156,10 @@ class LogParser:
             except queue.Empty:
                 pass
             if name is not None:
+                self.stats.new_file_time()
                 self.parse_alb_logs(name, lines)
                 self.file_out_queue.put(name)
+                self.stats.increment_files_processed()
             else:
                 threading.sleep(30)
 

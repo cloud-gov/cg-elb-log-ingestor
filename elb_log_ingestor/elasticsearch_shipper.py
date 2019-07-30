@@ -58,6 +58,7 @@ class ElasticsearchShipper:
             self.record_queue.put((id_, record))
         else:
             self.stats.increment_documents_indexed()
+            self.stats.document_time()
             logger.debug("Indexing document with id %s", id_)
 
     def figure_index(self, record: typing.Dict) -> str:
