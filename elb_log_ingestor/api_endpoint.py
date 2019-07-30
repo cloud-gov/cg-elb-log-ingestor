@@ -4,6 +4,9 @@ from http.server import BaseHTTPRequestHandler
 
 
 class ApiEndpoint(BaseHTTPRequestHandler):
+    """
+    Responds to web requests for health and stats checks
+    """
     def __init__(self, parser_stats, shipper_stats, shipper, fetcher, **kwargs) -> None:
         self.parser_stats = parser_stats
         self.shipper_stats = shipper_stats
@@ -12,6 +15,9 @@ class ApiEndpoint(BaseHTTPRequestHandler):
         super().__init__(**kwargs)
 
     def do_GET(self) -> None:
+        """
+        Handle an HTTP GET
+        """
         if self.path == "/stats":
             self.send_stats()
         elif self.path == "/health":
@@ -21,6 +27,9 @@ class ApiEndpoint(BaseHTTPRequestHandler):
             self.end_headers()
 
     def send_stats(self) -> None:
+        """
+        Send statistics as JSON
+        """
         parser = self.parser_stats.summary
         shipper = self.shipper_stats.summary
         parser["last_new_file_time"] = str(parser["last_new_file_time"])
@@ -32,6 +41,9 @@ class ApiEndpoint(BaseHTTPRequestHandler):
         self.wfile.write(bytes(json.dumps(stats)))
 
     def send_health(self) -> None:
+        """
+        Send health information, with a 500 if the service is unhealthy
+        """
         response = dict()
         response["elasticsearch_connected"] = self.shipper.healthy
         response["s3_connected"] = self.fetcher.healthy
@@ -40,8 +52,8 @@ class ApiEndpoint(BaseHTTPRequestHandler):
             self.send_response(200)
             self.send_header("Content-type", "application/json")
             self.end_headers()
-            self.wfile.write(bytes(json.dumps(response)))
         else:
             response["status"] = "DOWN"
             self.send_error(500, explain=bytes(json.dumps(response)))
             self.end_headers()
+        self.wfile.write(bytes(json.dumps(response)))
