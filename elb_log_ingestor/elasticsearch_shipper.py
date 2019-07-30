@@ -19,6 +19,7 @@ class ElasticsearchShipper:
     """
     Send messages to elasticsearch
     """
+
     def __init__(
         self,
         elasticsearch_client: elasticsearch.client,

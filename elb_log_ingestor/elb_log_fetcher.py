@@ -86,7 +86,7 @@ class S3LogFetcher:
             )
         except Exception:
             # ignore it and try again later - hopefully someone's checking health
-            logger.exception('Failed listing logs in S3')
+            logger.exception("Failed listing logs in S3")
             self.healthy = False
             return None
         else:
@@ -98,7 +98,7 @@ class S3LogFetcher:
         contents = io.BytesIO()
         self.botoclient.Bucket(self.bucket).download_fileobj(processing_name, contents)
         contents.seek(0)
-        strings = [line.decode('utf-8') for line in contents.readlines()]
+        strings = [line.decode("utf-8") for line in contents.readlines()]
         return processing_name, strings
 
     def mark_log_processed(self, logname: str) -> None:
