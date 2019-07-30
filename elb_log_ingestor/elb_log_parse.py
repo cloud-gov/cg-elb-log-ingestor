@@ -124,12 +124,13 @@ class LogParser:
     """
     Parses a/elb log files into dictionaries of a/elb events
     """
+
     def __init__(
         self,
         file_in_queue: queue.Queue,
         file_out_queue: queue.Queue,
         record_out_queue: queue.Queue,
-        stats: ParserStats
+        stats: ParserStats,
     ) -> None:
         # where we get files to process
         self.file_in_queue = file_in_queue

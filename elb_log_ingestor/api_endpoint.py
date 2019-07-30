@@ -7,6 +7,7 @@ class ApiEndpoint(BaseHTTPRequestHandler):
     """
     Responds to web requests for health and stats checks
     """
+
     def __init__(self, parser_stats, shipper_stats, shipper, fetcher, **kwargs) -> None:
         self.parser_stats = parser_stats
         self.shipper_stats = shipper_stats
