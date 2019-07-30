@@ -121,6 +121,9 @@ ELB = "elb"
 
 
 class LogParser:
+    """
+    Parses a/elb log files into dictionaries of a/elb events
+    """
     def __init__(
         self,
         file_in_queue: queue.Queue,
@@ -138,6 +141,13 @@ class LogParser:
         self.stats = stats
 
     def run(self) -> None:
+        """
+        Actually do the work:
+            - pull log files off the queue
+            - parse them
+            - put log events on the out queue
+            - put log filenames on the done queue
+        """
         while True:
             lines = None
             name = None
