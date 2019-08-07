@@ -6,7 +6,7 @@ import logging
 import pathlib
 import queue
 
-logger = logging.Logger(__self__)
+logger = logging.Logger(__name__)
 
 
 class S3LogFetcher:
