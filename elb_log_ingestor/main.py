@@ -5,14 +5,14 @@ import queue
 import sys
 import threading
 
-import boto
+import boto3
 import elasticsearch
 
-import api_endpoint
-import elasticsearch_shipper
-import elb_log_fetcher
-import elb_log_parse
-import stats
+from . import api_endpoint
+from . import elasticsearch_shipper
+from . import elb_log_fetcher
+from . import elb_log_parse
+from . import stats
 
 
 def start_server():
@@ -24,7 +24,7 @@ def start_server():
     es_client = elasticsearch.Elasticsearch(
         elasticsearch_hosts, sniff_on_start=True, sniffer_timeout=60
     )
-    s3_client = boto.client("s3")
+    s3_client = boto3.client("s3")
     server_address = get_server_address()
 
     logs_to_be_processed = queue.Queue()
