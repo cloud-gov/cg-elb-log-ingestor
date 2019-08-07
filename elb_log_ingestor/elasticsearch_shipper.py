@@ -8,7 +8,7 @@ import typing
 
 import elasticsearch
 
-import stats
+from . import stats
 
 
 logger = logging.Logger(__name__)
