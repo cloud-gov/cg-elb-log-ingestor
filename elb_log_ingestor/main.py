@@ -53,8 +53,8 @@ def start_server():
     shipper = elasticsearch_shipper.ElasticsearchShipper(
         es_client, records, index_pattern, shipper_stats
     )
-    api_endpoint = api_endpoint.ApiEndpoint(parser_stats, shipper, shipper, fetcher)
-    server = http.server.HTTPServer(server_address, api_endpoint)
+    api_endpoint_ = api_endpoint.ApiEndpoint(parser_stats, shipper, shipper, fetcher)
+    server = http.server.HTTPServer(server_address, api_endpoint_)
 
     fetcher_thread = threading.Thread(target=fetcher.run)
     parser_thread = threading.Thread(target=parser.run, daemon=True)
