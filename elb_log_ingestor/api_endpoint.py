@@ -5,15 +5,12 @@ from http.server import BaseHTTPRequestHandler
 
 class ApiEndpoint(BaseHTTPRequestHandler):
     """
-    Responds to web requests for health and stats checks
+    Responds to web requests for health and stats checks. Set parser_stats, shipper_stats, shipper, and fetcher before using!
     """
-
-    def __init__(self, parser_stats, shipper_stats, shipper, fetcher, **kwargs) -> None:
-        self.parser_stats = parser_stats
-        self.shipper_stats = shipper_stats
-        self.shipper = shipper
-        self.fetcher = fetcher
-        super().__init__(**kwargs)
+    parser_stats = None
+    shipper_stats = None
+    shipper = None
+    fetcher = None
 
     def do_GET(self) -> None:
         """
