@@ -17,7 +17,7 @@ setup(
     include_package_data=True,
     packages=find_packages(),
     entry_points={"console_scripts": "elb_log_ingestor=elb_log_ingestor.main:start_server"},
-    install_requires=["boto3", "elasticsearch"],
+    install_requires=["boto3", "elasticsearch>=6.0.0,<7.0.0"],
     setup_requires=["pytest_runner"],
     tests_require=open("requirements-dev.txt", "r").read().strip().split("\n"),
     classifiers=[
