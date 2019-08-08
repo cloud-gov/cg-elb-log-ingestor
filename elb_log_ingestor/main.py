@@ -77,7 +77,7 @@ def get_server_address() -> (str, int):
     listen_host = os.environ.get("ELB_INGESTOR_LISTEN_HOST", "localhost")
     if listen_host == "0.0.0.0":
         listen_host = ""
-    listen_port = os.environ.get("ELB_INGESTOR_LISTEN_PORT", 13131)
+    listen_port = int(os.environ.get("ELB_INGESTOR_LISTEN_PORT", 13131))
     return listen_host, listen_port
 
 
