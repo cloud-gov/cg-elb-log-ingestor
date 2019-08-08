@@ -46,7 +46,9 @@ def start_server():
         start_queue_size=start_queue_size,
     )
 
-    parser = elb_log_parse.LogParser(logs_to_be_processed, logs_processed, parser_stats)
+    parser = elb_log_parse.LogParser(
+        logs_to_be_processed, logs_processed, records, parser_stats
+    )
     shipper = elasticsearch_shipper.ElasticsearchShipper(
         es_client, records, index_pattern, shipper_stats
     )
