@@ -13,17 +13,18 @@ opinions took more work than writing our own single-purpose app
 AWS authentication is via [boto3][boto3], so use any auth method supported there.
 All other configuration is done via environment variables:
 
-| env variable                       | description                                            | default         |
-|------------------------------------|--------------------------------------------------------|-----------------|
-| `ELB_INGESTOR_BUCKET`              | Name of the bucket to look for logs in                 | No default      |
-| `ELB_INGESTOR_SEARCH_PREFIX`       | Prefix ("folder") under which to look for log files    | "logs/"         |
-| `ELB_INGESTOR_WORKING_PREFIX`      | Prefix to put logs being ingested into                 | "logs-working/" |
-| `ELB_INGESTOR_DONE_PREFIX`         | Prefix to put log files that have been ingested into   | "logs-done/"    |
-| `ELB_INGESTOR_START_QUEUE_SIZE`    | Number of log files to pull into queue at startup      | 5               |
-| `ELB_INGESTOR_LISTEN_HOST`         | Hostname or IP address to listen on for healthchecks   | "localhost"     |
-| `ELB_INGESTOR_LISTEN_PORT`         | Port to listen on for healthchecks                     | 13131           |
-| `ELB_INGESTOR_ELASTICSEARCH_HOSTS` | Comma-separated list of hosts (`host1:443,host2:9123`) | No default      |
-|                                    |                                                        |                 |
+| env variable                       | description                                            | default                        |
+|------------------------------------|--------------------------------------------------------|--------------------------------|
+| `ELB_INGESTOR_BUCKET`              | Name of the bucket to look for logs in                 | No default                     |
+| `ELB_INGESTOR_SEARCH_PREFIX`       | Prefix ("folder") under which to look for log files    | "logs/"                        |
+| `ELB_INGESTOR_WORKING_PREFIX`      | Prefix to put logs being ingested into                 | "logs-working/"                |
+| `ELB_INGESTOR_DONE_PREFIX`         | Prefix to put log files that have been ingested into   | "logs-done/"                   |
+| `ELB_INGESTOR_START_QUEUE_SIZE`    | Number of log files to pull into queue at startup      | 5                              |
+| `ELB_INGESTOR_LISTEN_HOST`         | Hostname or IP address to listen on for healthchecks   | "localhost"                    |
+| `ELB_INGESTOR_LISTEN_PORT`         | Port to listen on for healthchecks                     | 13131                          |
+| `ELB_INGESTOR_ELASTICSEARCH_HOSTS` | Comma-separated list of hosts (`host1:443,host2:9123`) | No default                     |
+| `ELB_INGESTOR_INDEX_PATTERN`       | Pattern to index documents into                        | "logs-platform-%{+YYYY.MM.dd}" |
+|                                    |                                                        |                                |
 
 ### reprocessing logs
 If you need to reprocess logs (for instance, an instance failed or records were lost from elasticsearch), 

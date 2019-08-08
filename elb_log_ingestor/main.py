@@ -35,6 +35,7 @@ def start_server():
     processing_prefix = os.environ.get("ELB_INGESTOR_WORKING_PREFIX", "logs-working/")
     processed_prefix = os.environ.get("ELB_INGESTOR_DONE_PREFIX", "logs-done/")
     start_queue_size = int(os.environ.get("ELB_INGESTOR_START_QUEUE_SIZE", 5))
+    index_pattern = os.environ.get("ELB_INDEX_PATTERN", "logs-platform-%{+YYYY.MM.dd}")
     fetcher = elb_log_fetcher.S3LogFetcher(
         bucket,
         s3_client,
