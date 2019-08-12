@@ -51,12 +51,13 @@ class S3LogFetcher:
         - if we can get a log off the done queue, mark it as done
         - if we get a log off the done queue, get another one for the to_do queue
         """
-        for i in range(self.start_queue_size):
-            next_log = self.get_next_log()
-            if next_log is not None:
-                self.to_do.put(next_log)
         while True:
-            finished_log = self.done.get()
+            if self.to_do.empty():
+                self.prime_queue()
+            try:
+                finished_log = self.done.get(timeout=1)
+            except queue.Empty:
+                continue
             try:
                 self.mark_log_processed(finished_log)
             except Exception as e:
@@ -69,9 +70,16 @@ class S3LogFetcher:
                 self.healthy = False
             else:
                 self.healthy = True
-            next_log = self.get_next_log()
-            if next_log is not None:
-                self.to_do.put(next_log)
+            self.enqueue_log()
+
+    def prime_queue(self):
+        for i in range(self.start_queue_size):
+            self.enqueue_log()
+
+    def enqueue_log(self):
+        next_log = self.get_next_log()
+        if next_log is not None:
+            self.to_do.put(next_log)
 
     def get_next_log(self) -> str:
         """
