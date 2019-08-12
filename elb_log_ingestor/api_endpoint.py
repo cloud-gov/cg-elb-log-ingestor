@@ -40,7 +40,7 @@ class ApiEndpoint(BaseHTTPRequestHandler):
         self.send_header("Content-type", "application/json")
         self.send_header("Content-length", str(len(response)))
         self.end_headers()
-        self.wfile.write(bytes(response))
+        self.wfile.write(response)
 
     def send_health(self) -> None:
         """
@@ -53,13 +53,13 @@ class ApiEndpoint(BaseHTTPRequestHandler):
             response["status"] = "UP"
             response = bytes(json.dumps(stats))
             self.send_response(200)
-            self.send_header("Content-type", "application/json")
-            self.send_header("Content-length", str(len(response)))
+            self.send_header("Content-Type", "application/json")
+            self.send_header("Content-Length", str(len(response)))
             self.end_headers()
         else:
             response["status"] = "DOWN"
             response = bytes(json.dumps(stats))
             self.send_error(500, explain=bytes(json.dumps(response)))
-            self.send_header("Content-length", str(len(response)))
+            self.send_header("Content-Length", str(len(response)))
             self.end_headers()
         self.wfile.write(response)
