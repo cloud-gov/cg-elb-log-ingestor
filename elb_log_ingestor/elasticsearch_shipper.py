@@ -63,7 +63,7 @@ class ElasticsearchShipper:
             logger.debug("Indexing document with id %s", id_)
 
     def figure_index(self, record: typing.Dict) -> str:
-        ts = datetime.datetime.fromisoformat(record["@timestamp"])
+        ts = datetime.datetime.fromisoformat(record["@timestamp"][:-1])
         return ts.strftime(self.index_pattern)
 
     @property
