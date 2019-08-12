@@ -16,6 +16,7 @@ class ApiEndpoint(BaseHTTPRequestHandler):
         """
         Handle an HTTP GET
         """
+        self.protocol_version = 'HTTP/1.1'
         if self.path == "/stats":
             self.send_stats()
         elif self.path == "/health":
@@ -33,10 +34,13 @@ class ApiEndpoint(BaseHTTPRequestHandler):
         parser["last_new_file_time"] = str(parser["last_new_file_time"])
         shipper["last_document_indexed_at"] = str(shipper["last_document_indexed_at"])
         stats = dict(parser=parser, shipper=shipper)
+        response = bytes(json.dumps(stats))
+        
         self.send_response(200)
         self.send_header("Content-type", "application/json")
+        self.send_header("Content-length", str(len(response)))
         self.end_headers()
-        self.wfile.write(bytes(json.dumps(stats)))
+        self.wfile.write(bytes(response))
 
     def send_health(self) -> None:
         """
@@ -47,11 +51,15 @@ class ApiEndpoint(BaseHTTPRequestHandler):
         response["s3_connected"] = self.fetcher.healthy
         if response["elasticsearch_connected"] and response["s3_connected"]:
             response["status"] = "UP"
+            response = bytes(json.dumps(stats))
             self.send_response(200)
             self.send_header("Content-type", "application/json")
+            self.send_header("Content-length", str(len(response)))
             self.end_headers()
         else:
             response["status"] = "DOWN"
+            response = bytes(json.dumps(stats))
             self.send_error(500, explain=bytes(json.dumps(response)))
+            self.send_header("Content-length", str(len(response)))
             self.end_headers()
-        self.wfile.write(bytes(json.dumps(response)))
+        self.wfile.write(response)
