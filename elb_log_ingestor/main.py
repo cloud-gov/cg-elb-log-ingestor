@@ -24,13 +24,14 @@ def start_server():
     es_client = elasticsearch.Elasticsearch(
         elasticsearch_hosts, sniff_on_start=True, sniffer_timeout=60
     )
-    s3_client = boto3.client("s3")
+    s3_client = boto3.resource("s3")
     server_address = get_server_address()
 
     logs_to_be_processed = queue.Queue()
     logs_processed = queue.Queue()
     records = queue.Queue()
-    bucket = os.environ["ELB_INGESTOR_BUCKET"]
+    bucket_name = os.environ["ELB_INGESTOR_BUCKET"]
+    bucket = s3_client.Bucket(bucket_name)
     unprocessed_prefix = os.environ.get("ELB_INGESTOR_SEARCH_PREFIX", "logs/")
     processing_prefix = os.environ.get("ELB_INGESTOR_WORKING_PREFIX", "logs-working/")
     processed_prefix = os.environ.get("ELB_INGESTOR_DONE_PREFIX", "logs-done/")
@@ -38,7 +39,6 @@ def start_server():
     index_pattern = os.environ.get("ELB_INDEX_PATTERN", "logs-platform-%{+YYYY.MM.dd}")
     fetcher = elb_log_fetcher.S3LogFetcher(
         bucket,
-        s3_client,
         unprocessed_prefix=unprocessed_prefix,
         processing_prefix=processing_prefix,
         processed_prefix=processed_prefix,
