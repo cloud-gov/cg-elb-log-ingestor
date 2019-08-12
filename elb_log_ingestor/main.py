@@ -58,7 +58,7 @@ def start_server():
     api_endpoint.ApiEndpoint.parser_stats = parser_stats 
     api_endpoint.ApiEndpoint.shipper_stats = shipper_stats
     api_endpoint.ApiEndpoint.fetcher = fetcher
-    api_endpoint.ApiEndpoint.fetcher = fetcher
+    api_endpoint.ApiEndpoint.shipper = shipper
 
     server = http.server.HTTPServer(server_address, api_endpoint.ApiEndpoint)
 
