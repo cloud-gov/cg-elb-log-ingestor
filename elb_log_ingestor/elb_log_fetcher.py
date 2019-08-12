@@ -116,7 +116,7 @@ class S3LogFetcher:
         # us to process a file more than once
         processing_name = self.processing_name_from_unprocessed_name(logname)
         self.move_object(from_=logname, to=processing_name)
-        return processed_name
+        return processing_name
 
     def move_object(self, from_, to) -> None:
         """
