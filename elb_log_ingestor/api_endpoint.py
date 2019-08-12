@@ -35,8 +35,8 @@ class ApiEndpoint(BaseHTTPRequestHandler):
         shipper["last_document_indexed_at"] = str(shipper["last_document_indexed_at"])
         stats = dict(parser=parser, shipper=shipper)
         stats['queues'] = dict()
-        stats['queues']['shipper'] = dict(description='Records waiting to be sent to Elasticsearch', length=shipper.record_queue.qsize())
-        stats['queues']['files'] = dict(description='Files waiting to be processed', length=fetcher.to_do.qsize())
+        stats['queues']['shipper'] = dict(description='Records waiting to be sent to Elasticsearch', length=self.shipper.record_queue.qsize())
+        stats['queues']['files'] = dict(description='Files waiting to be processed', length=self.fetcher.to_do.qsize())
         response = bytes(json.dumps(stats), 'utf-8')
         
         self.send_response(200)
