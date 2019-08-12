@@ -89,9 +89,10 @@ class S3LogFetcher:
             return None
         else:
             self.healthy = True
-        if len(boto_reponse["Contents"]) == 0:
+        boto_reponse = list(boto_reponse)
+        if len(boto_reponsed) == 0:
             return None
-        next_object = boto_reponse["Contents"][0]["Key"]
+        next_object = boto_reponse[0]["Key"]
         processing_name = self.mark_log_processing(next_object)
         contents = io.BytesIO()
         self.bucket.download_fileobj(processing_name, contents)
