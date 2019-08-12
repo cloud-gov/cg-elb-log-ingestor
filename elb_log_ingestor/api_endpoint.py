@@ -34,7 +34,7 @@ class ApiEndpoint(BaseHTTPRequestHandler):
         parser["last_new_file_time"] = str(parser["last_new_file_time"])
         shipper["last_document_indexed_at"] = str(shipper["last_document_indexed_at"])
         stats = dict(parser=parser, shipper=shipper)
-        response = bytes(json.dumps(stats))
+        response = bytes(json.dumps(stats), 'utf-8')
         
         self.send_response(200)
         self.send_header("Content-type", "application/json")
@@ -51,15 +51,15 @@ class ApiEndpoint(BaseHTTPRequestHandler):
         response["s3_connected"] = self.fetcher.healthy
         if response["elasticsearch_connected"] and response["s3_connected"]:
             response["status"] = "UP"
-            response = bytes(json.dumps(stats))
+            response = bytes(json.dumps(stats), 'utf-8')
             self.send_response(200)
             self.send_header("Content-Type", "application/json")
             self.send_header("Content-Length", str(len(response)))
             self.end_headers()
         else:
             response["status"] = "DOWN"
-            response = bytes(json.dumps(stats))
-            self.send_error(500, explain=bytes(json.dumps(response)))
+            response = bytes(json.dumps(stats), 'utf-8')
+            self.send_error(500, explain=response)
             self.send_header("Content-Length", str(len(response)))
             self.end_headers()
         self.wfile.write(response)
