@@ -90,7 +90,7 @@ class S3LogFetcher:
         else:
             self.healthy = True
         boto_reponse = list(boto_reponse)
-        if len(boto_reponsed) == 0:
+        if len(boto_reponse) == 0:
             return None
         next_object = boto_reponse[0]["Key"]
         processing_name = self.mark_log_processing(next_object)
