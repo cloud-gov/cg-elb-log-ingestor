@@ -16,6 +16,7 @@ class ApiEndpoint(BaseHTTPRequestHandler):
         """
         Handle an HTTP GET
         """
+        self.protocol_version = 'HTTP/1.1'
         if self.path == "/stats":
             self.send_stats()
         elif self.path == "/health":
@@ -33,10 +34,16 @@ class ApiEndpoint(BaseHTTPRequestHandler):
         parser["last_new_file_time"] = str(parser["last_new_file_time"])
         shipper["last_document_indexed_at"] = str(shipper["last_document_indexed_at"])
         stats = dict(parser=parser, shipper=shipper)
+        stats['queues'] = dict()
+        stats['queues']['shipper'] = dict(description='Records waiting to be sent to Elasticsearch', length=self.shipper.record_queue.qsize())
+        stats['queues']['files'] = dict(description='Files waiting to be processed', length=self.fetcher.to_do.qsize())
+        response = bytes(json.dumps(stats), 'utf-8')
+        
         self.send_response(200)
         self.send_header("Content-type", "application/json")
+        self.send_header("Content-length", str(len(response)))
         self.end_headers()
-        self.wfile.write(bytes(json.dumps(stats)))
+        self.wfile.write(response)
 
     def send_health(self) -> None:
         """
@@ -47,11 +54,15 @@ class ApiEndpoint(BaseHTTPRequestHandler):
         response["s3_connected"] = self.fetcher.healthy
         if response["elasticsearch_connected"] and response["s3_connected"]:
             response["status"] = "UP"
+            response = bytes(json.dumps(response), 'utf-8')
             self.send_response(200)
-            self.send_header("Content-type", "application/json")
+            self.send_header("Content-Type", "application/json")
+            self.send_header("Content-Length", str(len(response)))
             self.end_headers()
         else:
             response["status"] = "DOWN"
-            self.send_error(500, explain=bytes(json.dumps(response)))
+            response = bytes(json.dumps(stats), 'utf-8')
+            self.send_error(500, explain=response)
+            self.send_header("Content-Length", str(len(response)))
             self.end_headers()
-        self.wfile.write(bytes(json.dumps(response)))
+        self.wfile.write(response)

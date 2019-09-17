@@ -48,7 +48,7 @@ class ElasticsearchShipper:
         """
         index = self.figure_index(record)
         try:
-            self.es.create(index=index, id=id_, body=record)
+            self.es.create(index=index, id=id_, body=record, doc_type='doc')
         except elasticsearch.ConflictError:
             self.stats.increment_duplicates_skipped()
             logger.info("Skipping duplicate document with id %s", id_)
@@ -63,7 +63,10 @@ class ElasticsearchShipper:
             logger.debug("Indexing document with id %s", id_)
 
     def figure_index(self, record: typing.Dict) -> str:
-        ts = datetime.datetime.fromisoformat(record["@timestamp"])
+        ts = record['@timestamp']
+        if ts.endswith('Z'):
+            ts = ts[:-1]
+        ts = datetime.datetime.fromisoformat(ts)
         return ts.strftime(self.index_pattern)
 
     @property

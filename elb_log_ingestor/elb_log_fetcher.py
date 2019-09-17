@@ -51,12 +51,13 @@ class S3LogFetcher:
         - if we can get a log off the done queue, mark it as done
         - if we get a log off the done queue, get another one for the to_do queue
         """
-        for i in range(self.start_queue_size):
-            next_log = self.get_next_log()
-            if next_log is not None:
-                self.to_do.put(next_log)
         while True:
-            finished_log = self.done.get()
+            if self.to_do.empty():
+                self.prime_queue()
+            try:
+                finished_log = self.done.get(timeout=1)
+            except queue.Empty:
+                continue
             try:
                 self.mark_log_processed(finished_log)
             except Exception as e:
@@ -69,9 +70,16 @@ class S3LogFetcher:
                 self.healthy = False
             else:
                 self.healthy = True
-            next_log = self.get_next_log()
-            if next_log is not None:
-                self.to_do.put(next_log)
+            self.enqueue_log()
+
+    def prime_queue(self):
+        for i in range(self.start_queue_size):
+            self.enqueue_log()
+
+    def enqueue_log(self):
+        next_log = self.get_next_log()
+        if next_log is not None:
+            self.to_do.put(next_log)
 
     def get_next_log(self) -> str:
         """
@@ -89,9 +97,10 @@ class S3LogFetcher:
             return None
         else:
             self.healthy = True
-        if len(boto_reponse["Contents"]) == 0:
+        boto_reponse = list(boto_reponse)
+        if len(boto_reponse) == 0:
             return None
-        next_object = boto_reponse["Contents"][0]["Key"]
+        next_object = boto_reponse[0].key
         processing_name = self.mark_log_processing(next_object)
         contents = io.BytesIO()
         self.bucket.download_fileobj(processing_name, contents)
@@ -115,7 +124,7 @@ class S3LogFetcher:
         # us to process a file more than once
         processing_name = self.processing_name_from_unprocessed_name(logname)
         self.move_object(from_=logname, to=processing_name)
-        return processed_name
+        return processing_name
 
     def move_object(self, from_, to) -> None:
         """

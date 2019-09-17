@@ -190,8 +190,8 @@ class LogParser:
             match = remove_empty_fields(match)
             match = add_metadata(match, line, name)
             if match is not None:
-                id = generate_id(match)
-                self.outbox.put((id, match))
+                id_ = generate_id(match)
+                self.outbox.put((id_, match,))
                 self.stats.increment_lines_processed()
             else:
                 self.stats.increment_lines_errored()
