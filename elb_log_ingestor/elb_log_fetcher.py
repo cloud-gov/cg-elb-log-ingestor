@@ -16,8 +16,7 @@ class S3LogFetcher:
 
     def __init__(
         self,
-        bucket: str,
-        s3_client: "boto3.resources.factory.s3.ServiceResource",
+        bucket,
         unprocessed_prefix: str,
         processing_prefix: str,
         processed_prefix: str,
@@ -36,7 +35,6 @@ class S3LogFetcher:
         start_queue_size: how many log files to pull down on startup
         """
         self.bucket = bucket
-        self.botoclient = s3_client
         self.unprocessed_prefix = unprocessed_prefix
         self.processing_prefix = processing_prefix
         self.processed_prefix = processed_prefix
@@ -81,8 +79,8 @@ class S3LogFetcher:
         If there are no logs to get, return None.
         """
         try:
-            boto_reponse = self.botoclient.list_objects_v2(
-                Bucket=self.bucket, MaxKeys=1, Prefix=self.unprocessed_prefix
+            boto_reponse = self.bucket.objects.filter(
+                MaxKeys=1, Prefix=self.unprocessed_prefix
             )
         except Exception:
             # ignore it and try again later - hopefully someone's checking health
@@ -96,7 +94,7 @@ class S3LogFetcher:
         next_object = boto_reponse["Contents"][0]["Key"]
         processing_name = self.mark_log_processing(next_object)
         contents = io.BytesIO()
-        self.botoclient.Bucket(self.bucket).download_fileobj(processing_name, contents)
+        self.bucket.download_fileobj(processing_name, contents)
         contents.seek(0)
         strings = [line.decode("utf-8") for line in contents.readlines()]
         return processing_name, strings
@@ -124,10 +122,9 @@ class S3LogFetcher:
         Move/rename an object within this bucket.
         """
         # boto doesn't have a move operation, so we need to copy then delete
-        bucket = self.botoclient.Bucket(self.bucket)
-        bucket.copy(dict(Bucket=self.bucket, Key=from_), to)
+        self.bucket.copy(dict(Bucket=self.bucket.name, Key=from_), to)
         delete_request = {"Objects": [{"Key": from_}], "Quiet": True}
-        bucket.delete_objects(Delete=delete_request)
+        self.bucket.delete_objects(Delete=delete_request)
 
     def processing_name_from_unprocessed_name(self, unprocessed_name: str) -> str:
         """
