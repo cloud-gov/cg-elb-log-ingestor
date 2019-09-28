@@ -22,7 +22,7 @@ class S3LogFetcher:
         processed_prefix: str,
         to_do: queue.Queue,
         done: queue.Queue,
-        start_queue_size: int = 5,
+        file_batch_size: int = 5,
     ) -> None:
         """
         bucket: the name of the bucket
@@ -32,7 +32,7 @@ class S3LogFetcher:
         processed_prefix: the prefix in the bucket to put processed logs
         to_do: the queue to send work to the log parser
         done: the queue to listen on for finished work
-        start_queue_size: how many log files to pull down on startup
+        file_batch_size: how many log files to pull down at a time
         """
         self.bucket = bucket
         self.unprocessed_prefix = unprocessed_prefix
@@ -40,7 +40,7 @@ class S3LogFetcher:
         self.processed_prefix = processed_prefix
         self.to_do = to_do
         self.done = done
-        self.start_queue_size = start_queue_size
+        self.file_batch_size = file_batch_size
         self.healthy = True
 
     def run(self) -> None:
@@ -53,7 +53,7 @@ class S3LogFetcher:
         """
         while True:
             if self.to_do.empty():
-                self.prime_queue()
+                self.enqueue_log(self.file_batch_size)
             try:
                 finished_log = self.done.get(timeout=1)
             except queue.Empty:
@@ -70,25 +70,15 @@ class S3LogFetcher:
                 self.healthy = False
             else:
                 self.healthy = True
-            self.enqueue_log()
 
-    def prime_queue(self):
-        for i in range(self.start_queue_size):
-            self.enqueue_log()
-
-    def enqueue_log(self):
-        next_log = self.get_next_log()
-        if next_log is not None:
-            self.to_do.put(next_log)
-
-    def get_next_log(self) -> str:
+    def enqueue_log(self, count: int = 1) -> str:
         """
         Download one log from S3, mark it as processing, and return its name.
         If there are no logs to get, return None.
         """
         try:
-            boto_reponse = self.bucket.objects.filter(
-                MaxKeys=1, Prefix=self.unprocessed_prefix
+            boto_response = self.bucket.objects.filter(
+                MaxKeys=count, Prefix=self.unprocessed_prefix
             )
         except Exception:
             # ignore it and try again later - hopefully someone's checking health
@@ -97,16 +87,15 @@ class S3LogFetcher:
             return None
         else:
             self.healthy = True
-        boto_reponse = list(boto_reponse)
-        if len(boto_reponse) == 0:
-            return None
-        next_object = boto_reponse[0].key
-        processing_name = self.mark_log_processing(next_object)
-        contents = io.BytesIO()
-        self.bucket.download_fileobj(processing_name, contents)
-        contents.seek(0)
-        strings = [line.decode("utf-8") for line in contents.readlines()]
-        return processing_name, strings
+        boto_response = list(boto_response)
+        for response in boto_response:
+            next_object = response.key
+            processing_name = self.mark_log_processing(next_object)
+            contents = io.BytesIO()
+            self.bucket.download_fileobj(processing_name, contents)
+            contents.seek(0)
+            strings = [line.decode("utf-8") for line in contents.readlines()]
+            self.to_do.put((processing_name, strings),)
 
     def mark_log_processed(self, logname: str) -> None:
         """

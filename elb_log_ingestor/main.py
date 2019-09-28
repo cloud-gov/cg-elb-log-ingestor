@@ -35,7 +35,7 @@ def start_server():
     unprocessed_prefix = os.environ.get("ELB_INGESTOR_SEARCH_PREFIX", "logs/")
     processing_prefix = os.environ.get("ELB_INGESTOR_WORKING_PREFIX", "logs-working/")
     processed_prefix = os.environ.get("ELB_INGESTOR_DONE_PREFIX", "logs-done/")
-    start_queue_size = int(os.environ.get("ELB_INGESTOR_START_QUEUE_SIZE", 5))
+    file_batch_size = int(os.environ.get("ELB_INGESTOR_FILE_BATCH_SIZE", 5))
     index_pattern = os.environ.get("ELB_INDEX_PATTERN", "logs-platform-%Y.%m.%d")
     fetcher = elb_log_fetcher.S3LogFetcher(
         bucket,
@@ -44,7 +44,7 @@ def start_server():
         processed_prefix=processed_prefix,
         to_do=logs_to_be_processed,
         done=logs_processed,
-        start_queue_size=start_queue_size,
+        file_batch_size=file_batch_size
     )
 
     parser = elb_log_parse.LogParser(

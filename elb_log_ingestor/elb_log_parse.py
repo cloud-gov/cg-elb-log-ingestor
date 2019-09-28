@@ -161,8 +161,6 @@ class LogParser:
                 self.parse_alb_logs(name, lines)
                 self.file_out_queue.put(name)
                 self.stats.increment_files_processed()
-            else:
-                threading.sleep(30)
 
     def parse_alb_logs(self, name, lines: typing.List[str]) -> None:
         """
